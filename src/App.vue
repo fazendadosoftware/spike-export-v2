@@ -2,7 +2,7 @@
   <div id="app" class="bg-red-400 h-screen relative">
     <div id="control-box" class="z-50 bg-gray-200 absolute top-0 right-0 bg-white shadow-lg p-2 m-2 border-2 border-gray-600">
       <div class="mb-2 text-sm font-bold">
-        View types
+        View types {{autoscale}}
       </div>
       <div class="flex justify-around">
         <button v-for="view in views" :key="view.key" class="btn" :class="view.btnclass" @click="selectedView = view" :selected="selectedView.key === view.key">
@@ -12,35 +12,56 @@
       <div class="flex flex-col">
         <div class="mt-8 mb-3 text-sm font-bold">
            HTML element dimensions
+           <span class="ml-2 p-1 rounded text-white" :class="dimensionsLocked ? 'bg-green-500' : 'bg-red-500'" >
+             <font-awesome-icon :icon="dimensionsLocked ? 'link' : 'unlink'" />
+           </span>
         </div>
         <div class="flex">
           <div class="form-group flex w-1/2 p-2">
             <label class="text-xs font-bold">Width (px)</label>
             <input
               class="text-sm shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none"
-              v-model="width"
+              v-model.number="localWidth"
               type="number">
           </div>
           <div class="form-group flex w-1/2 p-2">
             <label class="text-xs font-bold">Height (px)</label>
             <input
               class="text-sm shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none"
-              v-model="height"
+              v-model.number="localHeight"
               type="number">
           </div>
         </div>
-        <div class="flex p-2 bg-green-100 justify-end">
-          <button class="btn bg-red-500 hover:bg-red-700 text-white" :style="'opacity: 1; width: 50px'" @click="resetElementDimensions">
+        <div class="flex p-2 justify-end">
+          <button
+            class="btn text-white"
+            :class="{ 'bg-red-300 cursor-default': !dimensionsDirty, 'hover:bg-red-700 bg-red-500 opacity-50': dimensionsDirty || !dimensionsLocked }"
+            :disabled="!dimensionsDirty && dimensionsLocked"
+            :style="'opacity: 1; width: 50px'"
+            @click="resetElementDimensions">
             <font-awesome-icon icon="undo" />
           </button>
-          <button class="btn bg-green-500 hover:bg-green-700 text-white ml-1 w-10" :style="'opacity: 1; width: 50px'" @click="setElementDimensions">
+          <button
+            class="btn text-white ml-1 w-10"
+            :class="{ 'bg-green-300 cursor-default': !dimensionsDirty, 'hover:bg-green-700 bg-green-500 opacity-50': dimensionsDirty }"
+            :disabled="!dimensionsDirty"
+            :style="'opacity: 1; width: 50px'"
+            @click="setElementDimensions">
             <font-awesome-icon icon="check" />
           </button>
+        </div>
+        <div class="flex">
+          <label class="ml-2 text-gray-900 font-bold">
+            <input v-model="autoscale" class="mr-2 leading-tight" type="checkbox">
+            <span class="text-sm">
+              Autoscale
+            </span>
+          </label>
         </div>
       </div>
     </div>
     <div id="report-container">
-      <component :is="selectedView.component" :as-canvas="selectedView.asCanvas"/>
+      <component :is="selectedView.component" :as-canvas="selectedView.asCanvas" :width="elWidth" :height="elHeight"/>
     </div>
   </div>
 </template>
@@ -54,8 +75,13 @@ export default {
   name: 'app',
   components: { Flexbox, Grid, ForceNetwork },
   data: () => ({
-    width: 0,
-    height: 0,
+    autoscale: true,
+    elWidth: 0,
+    elHeight: 0,
+    localWidth: 0,
+    localHeight: 0,
+    windowWidth: 0,
+    windowHeight: 0,
     selectedView: { key: 'flexbox', component: 'flexbox', label: 'Flexbox', btnclass: 'bg-green-500 hover:bg-green-700 text-white' },
     views: [
       { key: 'flexbox', component: 'flexbox', label: 'Flexbox', btnclass: 'bg-green-500 hover:bg-green-700 text-white' },
@@ -65,40 +91,75 @@ export default {
     ]
   }),
   methods: {
-    getViewportDimensions () {
-      const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-      const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-      return { w, h }
-    },
     resetElementDimensions () {
-      const { w, h } = this.getViewportDimensions()
-      this.height = h
-      this.width = w
+      this.localHeight = this.windowHeight
+      this.localWidth = this.windowWidth
+      this.elHeight = this.windowHeight
+      this.elWidth = this.windowWidth
     },
     setElementDimensions () {
-      console.log('SETTING ELEMENT DIMENSIONS')
+      this.elHeight = this.localHeight
+      this.elWidth = this.localWidth
+    },
+    getWindowSize (evt) {
+      const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+      const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+      if (this.elWidth === this.windowWidth && this.elHeight === this.windowHeight) {
+        this.elWidth = w
+        this.elHeight = h
+        this.localWidth = w
+        this.localHeight = h
+      }
+      this.windowWidth = w
+      this.windowHeight = h
+    },
+    getReportConfiguration () {
+      return {
+        allowTableView: false,
+        facets: [
+          { key: 1, label: '' }
+        ],
+        export: {
+          autoscale: this.autoscale,
+          orientation: 'landscape',
+          exportElementSelector: 'div#report-container'
+        }
+      }
+    }
+  },
+  computed: {
+    dimensionsDirty () {
+      return (this.elWidth !== this.localWidth) || (this.elHeight !== this.localHeight)
+    },
+    dimensionsLocked () {
+      return this.elWidth === this.windowWidth && this.elHeight === this.windowHeight
+    }
+  },
+  watch: {
+    autoscale (autoscale) {
+      const config = this.getReportConfiguration()
+      this.$lx.updateConfiguration(config)
     }
   },
   created () {
     this.$lx.init()
       .then(reportSetup => {
-        const config = {
-          allowTableView: false,
-          facets: [
-            { key: 1, label: '' }
-          ],
-          export: {
-            autoscale: true,
-            exportElementSelector: 'div#report-container'
-          }
-        }
+        const config = this.getReportConfiguration()
         this.$lx.ready(config)
       })
   },
   mounted () {
-    const { w, h } = this.getViewportDimensions()
-    this.height = h
-    this.width = w
+    this.$nextTick(() => {
+      window.addEventListener('resize', this.getWindowSize)
+      this.getWindowSize()
+      this.localHeight = this.windowHeight
+      this.localWidth = this.windowWidth
+      this.elHeight = this.windowHeight
+      this.elWidth = this.windowWidth
+    })
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.getWindowSize)
   }
 }
 </script>
