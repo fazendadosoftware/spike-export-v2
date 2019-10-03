@@ -1,7 +1,7 @@
 <template>
   <d3-network
     class="shadow h-screen w-full"
-    :class="asCanvas ? 'bg-pink-200' : 'bg-red-200'"
+    :class="asCanvas ? 'bg-red-300' : 'bg-pink-300'"
     :net-nodes="nodes" :net-links="links" :options="options"/>
 </template>
 
