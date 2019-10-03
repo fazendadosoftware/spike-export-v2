@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper py-2 px-2 bg-blue-300 h-screen">
+  <div class="wrapper py-2 px-2 bg-blue-300 h-screen" :style="computedStyle">
     <div class="box a p-4">Grid A</div>
     <div class="box b p-4">Grid B</div>
     <div class="box c p-4">Grid C</div>
@@ -8,6 +8,27 @@
     <div class="box f p-4">Grid F</div>
   </div>
 </template>
+
+<script>
+export default {
+  name: 'Grid',
+  props: {
+    width: {
+      type: Number,
+      required: false
+    },
+    height: {
+      type: Number,
+      required: false
+    }
+  },
+  computed: {
+    computedStyle () {
+      return `${this.width ? `width: ${this.width}px;` : ''}${this.height ? `height: ${this.height}px` : ''}`
+    }
+  }
+}
+</script>
 
 <style lang="stylus" scoped>
   .wrapper

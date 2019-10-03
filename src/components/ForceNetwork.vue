@@ -2,6 +2,7 @@
   <d3-network
     class="shadow h-screen w-full"
     :class="asCanvas ? 'bg-red-300' : 'bg-pink-300'"
+    :style="computedStyle"
     :net-nodes="nodes" :net-links="links" :options="options"/>
 </template>
 
@@ -14,6 +15,14 @@ export default {
   props: {
     asCanvas: {
       type: Boolean,
+      required: false
+    },
+    width: {
+      type: Number,
+      required: false
+    },
+    height: {
+      type: Number,
       required: false
     }
   },
@@ -51,6 +60,15 @@ export default {
   watch: {
     asCanvas (val) {
       this.options = { ...this.options, canvas: this.asCanvas }
+    },
+    computedStyle () {
+      this.options = { ...this.options }
+      console.log('redraw...')
+    }
+  },
+  computed: {
+    computedStyle () {
+      return `${this.width ? `width: ${this.width}px;` : ''}${this.height ? `height: ${this.height}px` : ''}`
     }
   },
   mounted () {
