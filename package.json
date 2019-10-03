@@ -9,8 +9,14 @@
     "upload": "vue-cli-service build && vue-cli-service upload"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
+    "@fortawesome/vue-fontawesome": "^0.1.7",
     "core-js": "^2.6.5",
-    "vue": "^2.6.10"
+    "diagram-vue": "^0.2.2",
+    "vis-network": "^6.1.1",
+    "vue": "^2.6.10",
+    "vue-d3-network": "^0.1.28"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.11.0",
@@ -22,6 +28,7 @@
     "eslint-plugin-vue": "^5.0.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
+    "tailwindcss": "^1.1.2",
     "vue-cli-plugin-leanix": "^0.2.1",
     "vue-template-compiler": "^2.6.10"
   },

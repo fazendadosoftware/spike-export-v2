@@ -1,0 +1,16 @@
+<template>
+  <div class="flex flex-wrap bg-green-300 pt-4 pl-4 h-screen">
+    <div v-for="item in Array(12).keys()" :key="item" class="w-1/3 pr-4 pb-4">
+      <div class="flex justify-center items-center box h-full">Flexbox {{item}}</div>
+    </div>
+  </div>
+</template>
+
+<style lang="stylus" scoped>
+.box
+  background-color #444
+  color #fff
+  font-size 150%
+  border-radius 5px
+  padding 20px
+</style>
