@@ -2,7 +2,7 @@
   <div id="app" class="bg-red-400 h-screen relative">
     <div id="control-box" class="z-50 bg-gray-200 absolute top-0 right-0 bg-white shadow-lg p-2 m-2 border-2 border-gray-600">
       <div class="mb-2 text-sm font-bold">
-        View types {{autoscale}}
+        View types {{orientation}}
       </div>
       <div class="flex justify-around">
         <button v-for="view in views" :key="view.key" class="btn" :class="view.btnclass" @click="selectedView = view" :selected="selectedView.key === view.key">
@@ -50,8 +50,32 @@
             <font-awesome-icon icon="check" />
           </button>
         </div>
-        <div class="flex">
-          <label class="ml-2 text-gray-900 font-bold">
+        <div class="flex p-2 mt-4">
+          <div class="form-group relative w-1/2">
+            <label class="text-xs font-bold" :style="'top: -17px; left: 0px'">Orientation</label>
+            <select
+              v-model="orientation"
+              class="text-sm shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none">
+              <option v-for="option in orientations" :key="option.key" v-bind:value="option.key">{{option.label}}</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+          </div>
+          <div class="form-group relative w-1/2 ml-4">
+            <label class="text-xs font-bold" :style="'top: -17px; left: 0px'">Format</label>
+            <select
+              v-model="format"
+              class="text-sm shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none">
+              <option v-for="option in formats" :key="option.key" v-bind:value="option.key">{{option.label}}</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="flex p-2 mt-3">
+          <label class="text-gray-900 font-bold">
             <input v-model="autoscale" class="mr-2 leading-tight" type="checkbox">
             <span class="text-sm">
               Autoscale
@@ -88,7 +112,21 @@ export default {
       { key: 'grid', component: 'grid', label: 'Grid', btnclass: 'bg-blue-500 hover:bg-blue-700 text-white' },
       { key: 'canvas-component', component: 'force-network', asCanvas: true, label: 'Canvas', btnclass: 'bg-red-500 hover:bg-red-700 text-white' },
       { key: 'svg-component', component: 'force-network', label: 'SVG', btnclass: 'bg-pink-500 hover:bg-pink-700 text-white' }
-    ]
+    ],
+    orientations: [
+      { key: 'portrait', label: 'Portrait' },
+      { key: 'landscape', label: 'Landscape' }
+    ],
+    orientation: 'portrait',
+    formats: [
+      { key: 'a0', label: 'A0' },
+      { key: 'a1', label: 'A1' },
+      { key: 'a2', label: 'A2' },
+      { key: 'a3', label: 'A3' },
+      { key: 'a4', label: 'A4' },
+      { key: 'letter', label: 'Letter' }
+    ],
+    format: 'a4'
   }),
   methods: {
     resetElementDimensions () {
@@ -121,7 +159,8 @@ export default {
         ],
         export: {
           autoscale: this.autoscale,
-          orientation: 'landscape',
+          orientation: this.orientation,
+          format: this.format,
           exportElementSelector: 'div#report-container'
         }
       }
@@ -136,7 +175,15 @@ export default {
     }
   },
   watch: {
-    autoscale (autoscale) {
+    autoscale () {
+      const config = this.getReportConfiguration()
+      this.$lx.updateConfiguration(config)
+    },
+    orientation () {
+      const config = this.getReportConfiguration()
+      this.$lx.updateConfiguration(config)
+    },
+    format () {
       const config = this.getReportConfiguration()
       this.$lx.updateConfiguration(config)
     }
@@ -188,6 +235,4 @@ export default {
   top -10px
   left 10px
 
-.form-group > input
-  border none
 </style>
