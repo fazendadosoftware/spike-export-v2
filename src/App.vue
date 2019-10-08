@@ -213,7 +213,7 @@ export default {
 
 <style lang="stylus" scoped>
 #app
-  font-family 'Avenir', Helvetica, Arial, sans-serif
+  font-family 'HussarBoldWeb', 'Avenir', Helvetica, Arial, sans-serif
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
   text-align center
@@ -234,5 +234,9 @@ export default {
   position absolute
   top -10px
   left 10px
+
+@font-face
+  font-family 'HussarBoldWeb'
+  src url('./assets/font/HussarBoldWeb.woff') format('woff')
 
 </style>
